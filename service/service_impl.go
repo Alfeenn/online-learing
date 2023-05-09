@@ -29,8 +29,11 @@ func (s *ServiceImpl) Create(ctx context.Context, req web.CategoryRequest) web.C
 
 	request := model.User{
 		Id:       req.Id,
-		Email:    req.Email,
+		Username: req.Username,
 		Password: req.Password,
+		Name:     req.Name,
+		Age:      req.Age,
+		Phone:    req.Phone,
 		Role:     req.Role,
 	}
 
@@ -96,7 +99,7 @@ func (s *ServiceImpl) Login(ctx context.Context, request web.CategoryRequest) we
 	}
 	defer helper.CommitorRollback(tx)
 	category := model.User{
-		Email:    request.Email,
+		Username: request.Username,
 		Password: request.Password,
 	}
 	category, err = s.Rep.Login(ctx, tx, category)

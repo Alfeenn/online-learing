@@ -15,7 +15,7 @@ func GenerateToken(c *gin.Context, key interface{}, user web.CatResp) model.Sess
 	timeT := time.Now().Add(5 * time.Minute)
 
 	claims := &model.Token{
-		Username: user.Email,
+		Username: user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 
 			ExpiresAt: jwt.NewNumericDate(timeT),

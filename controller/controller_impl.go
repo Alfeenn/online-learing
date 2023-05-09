@@ -26,7 +26,7 @@ func NewController(c service.Service) Controller {
 func (c *ControllerImpl) Create(g *gin.Context) {
 	enforcer := middleware.UserPolicy()
 	req := web.CategoryRequest{
-		Email:    g.Request.FormValue("email"),
+		Username: g.Request.FormValue("username"),
 		Password: g.Request.FormValue("password"),
 		Role:     g.Request.FormValue("role"),
 	}
@@ -42,7 +42,7 @@ func (c *ControllerImpl) Create(g *gin.Context) {
 
 	req.Password, _ = helper.HashPassword(req.Password)
 	resp := c.ServiceModel.Create(g.Request.Context(), req)
-	enforcer.AddGroupingPolicy(fmt.Sprint(resp.Email), resp.Role)
+	enforcer.AddGroupingPolicy(fmt.Sprint(resp.Username), resp.Role)
 	response := web.WebResponse{
 		Code:   http.StatusCreated,
 		Status: "CREATED",

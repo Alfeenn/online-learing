@@ -1,10 +1,29 @@
 package helper
 
-import "fmt"
+import (
+	"fmt"
+	"log"
 
-func SQLStatement(host, port, user, password, dbname string) string {
+	"github.com/Alfeenn/online-learning/model"
+	"github.com/caarlos0/env/v8"
+	"github.com/joho/godotenv"
+)
 
+var dbConfig = model.DBConfig{}
+
+func SQLStatement() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
-		user, password, host, port, dbname)
+		dbConfig.Username, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Name)
 
+}
+
+func NewDB() string {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Unable to load env")
+	}
+	if err := env.Parse(&dbConfig); err != nil {
+		log.Fatal("Unable to parse variables")
+	}
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/",
+		dbConfig.Username, dbConfig.Password, dbConfig.Host, dbConfig.Port)
 }

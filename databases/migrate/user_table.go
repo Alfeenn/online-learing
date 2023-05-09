@@ -11,5 +11,5 @@ type UserTable struct {
 }
 
 func (UserTable) TableName() string {
-	return os.Getenv("DBNAME") + ".user"
+	return os.Getenv("DBNAME") + ".users"
 }

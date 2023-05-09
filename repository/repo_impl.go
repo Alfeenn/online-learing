@@ -20,8 +20,8 @@ func (r *RepoImpl) Create(ctx context.Context, tx *sql.Tx, category model.User) 
 	SQL := "INSERT INTO user(id,email,password,role,created_at,updated_at) VALUES(?,?,?,?,?,?)"
 	category.Id = uuid.NewString()
 	_, err := tx.ExecContext(ctx, SQL,
-		category.Id, category.Email, category.Password,
-		category.Role, category.CreatedAt, category.UpdatedAt)
+		category.Id, category.Username, category.Password,
+		category.Role, category.Phone, category.Password)
 	helper.PanicIfErr(err)
 	return category
 }
@@ -29,7 +29,7 @@ func (r *RepoImpl) Create(ctx context.Context, tx *sql.Tx, category model.User) 
 func (r *RepoImpl) Update(ctx context.Context, tx *sql.Tx, category model.User) model.User {
 	SQL := "UPDATE article SET name=? WHERE id=?"
 
-	_, err := tx.ExecContext(ctx, SQL, category.Email, category.Id)
+	_, err := tx.ExecContext(ctx, SQL, category.Username, category.Id)
 	helper.PanicIfErr(err)
 
 	return category
@@ -52,8 +52,8 @@ func (r *RepoImpl) FindAll(ctx context.Context, tx *sql.Tx) []model.User {
 
 	for rows.Next() {
 		article := model.User{}
-		err := rows.Scan(&article.Id, &article.Email,
-			&article.Password, &article.Role, &article.CreatedAt, &article.UpdatedAt)
+		err := rows.Scan(&article.Id, &article.Username, &article.Name, &article.Age,
+			&article.Password, &article.Role, &article.Phone, &article.Role)
 		helper.PanicIfErr(err)
 		sliceArticle = append(sliceArticle, article)
 	}
@@ -68,8 +68,8 @@ func (r *RepoImpl) Find(ctx context.Context, tx *sql.Tx, id string) (model.User,
 	defer rows.Close()
 	article := model.User{}
 	if rows.Next() {
-		rows.Scan(&article.Id, &article.Email,
-			&article.Password, &article.Role, &article.CreatedAt, &article.UpdatedAt)
+		rows.Scan(&article.Id, &article.Username,
+			&article.Password, &article.Role, &article.Phone, &article.Role)
 
 		return article, nil
 	} else {
@@ -80,12 +80,12 @@ func (r *RepoImpl) Find(ctx context.Context, tx *sql.Tx, id string) (model.User,
 
 func (m *RepoImpl) Login(ctx context.Context, tx *sql.Tx, category model.User) (model.User, error) {
 	SQL := `SELECT email,password FROM user WHERE email=?`
-	rows, err := tx.QueryContext(ctx, SQL, category.Email)
+	rows, err := tx.QueryContext(ctx, SQL, category.Username)
 	helper.PanicIfErr(err)
 	defer rows.Close()
 	user := model.User{}
 	if rows.Next() {
-		err := rows.Scan(&user.Email, &user.Password)
+		err := rows.Scan(&user.Username, &user.Password)
 		if err != nil {
 			panic(err)
 		}
@@ -94,4 +94,14 @@ func (m *RepoImpl) Login(ctx context.Context, tx *sql.Tx, category model.User) (
 
 		return user, errors.New("no data")
 	}
+}
+
+func (r *RepoImpl) Register(ctx context.Context, tx *sql.Tx, category model.User) model.User {
+	SQL := "INSERT INTO user(id,email,password,role,created_at,updated_at) VALUES(?,?,?,?,?,?)"
+	category.Id = uuid.NewString()
+	_, err := tx.ExecContext(ctx, SQL,
+		category.Id, category.Username, category.Password,
+		category.Role, category.Age, category.Phone)
+	helper.PanicIfErr(err)
+	return category
 }

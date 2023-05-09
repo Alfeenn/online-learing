@@ -14,6 +14,8 @@ import (
 func Tables() []interface{} {
 	return []interface{}{
 		&migrate.UserTable{},
+		&migrate.CourseTable{},
+		&migrate.ClassTable{},
 	}
 }
 

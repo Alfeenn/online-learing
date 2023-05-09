@@ -8,27 +8,30 @@ import (
 
 	"github.com/Alfeenn/online-learning/helper"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 )
 
 func NewDB() *sql.DB {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Print("Unable to load env")
-	}
-	statement := helper.SQLStatement(
-		os.Getenv("HOST"),
-		os.Getenv("PORT"),
-		os.Getenv("USER"),
-		os.Getenv("PASSWORD"),
-		os.Getenv("DBNAME"),
-	)
-	log.Print(statement)
+	CreateDB()
+	statement := helper.SQLStatement()
 	db, err := sql.Open("mysql", statement)
-
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Connected")
 	return db
+}
+
+func CreateDB() {
+	initDB := helper.NewDB()
+	dbName := os.Getenv("DBNAME")
+	db, err := sql.Open("mysql", initDB)
+	if err != nil {
+		log.Fatal("connection error")
+	}
+	defer db.Close()
+	createDBCommand := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbName)
+	_, err = db.Exec(createDBCommand)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

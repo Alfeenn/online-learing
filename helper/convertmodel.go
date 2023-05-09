@@ -7,11 +7,12 @@ import (
 
 func ConvertModel(req model.User) web.CatResp {
 	return web.CatResp{
-		Id:        req.Id,
-		Email:     req.Email,
-		Password:  req.Password,
-		Role:      req.Role,
-		CreatedAt: req.CreatedAt,
-		UpdatedAt: req.UpdatedAt,
+		Id:       req.Id,
+		Username: req.Username,
+		Password: req.Password,
+		Name:     req.Name,
+		Age:      req.Age,
+		Phone:    req.Phone,
+		Role:     req.Role,
 	}
 }

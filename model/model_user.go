@@ -1,10 +1,11 @@
 package model
 
 type User struct {
-	Id        string `gorm:"primary_key; column:id"`
-	Email     string `gorm:"not null; unique; size:32"`
-	Password  string `gorm:"not null; size:20"`
-	Role      string `gorm:"not null; size:10"`
-	CreatedAt string `gorm:"column:created_at"`
-	UpdatedAt string `gorm:"column:updated_at"`
+	Id       string `gorm:"primary_key; column:id"`
+	Username string `gorm:"not null; unique; size:32"`
+	Password string `gorm:"not null; size:50"`
+	Name     string `gorm:"not null; size:20"`
+	Age      int64  `gorm:"not null; size:20"`
+	Phone    int64  `gorm:"not null; size:20"`
+	Role     string `gorm:"not null; size:10"`
 }

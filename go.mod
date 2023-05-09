@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
+	github.com/caarlos0/env/v8 v8.0.0 // indirect
 	github.com/casbin/casbin v1.9.1 // indirect
 	github.com/casbin/casbin/v2 v2.55.1 // indirect
 	github.com/casbin/gorm-adapter/v3 v3.16.1 // indirect
