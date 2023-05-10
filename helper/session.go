@@ -12,7 +12,7 @@ import (
 )
 
 func GenerateToken(c *gin.Context, key interface{}, user web.CatResp) model.Session {
-	timeT := time.Now().Add(5 * time.Minute)
+	timeT := time.Now().Add(10 * time.Minute)
 
 	claims := &model.Token{
 		Id:       user.Id,
