@@ -12,8 +12,8 @@ type Course struct {
 }
 
 type Class struct {
-	UserId   string `gorm:"size:40" json:"-"`
-	Users    User   `gorm:"foreignKey:UserId" json:"user"`
-	CourseId string `gorm:"size:40" json:"-"`
-	Courses  Course `gorm:"foreignKey:CourseId" json:"course"`
+	UserId   string `form:"userid" gorm:"size:40" json:"user_id"`
+	Users    User   `gorm:"foreignKey:UserId" json:"-"`
+	CourseId string `gorm:"size:40" json:"course_id"`
+	Courses  Course `gorm:"foreignKey:CourseId" json:"-"`
 }

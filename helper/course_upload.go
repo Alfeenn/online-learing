@@ -9,6 +9,7 @@ import (
 
 func UploadFile(g *gin.Context) (model.Course, error) {
 	course := model.Course{}
+	course.Id = g.Param("id")
 	g.Request.ParseMultipartForm(10 << 20)
 	_, FileHeader, err := g.Request.FormFile("file")
 	if err != nil {

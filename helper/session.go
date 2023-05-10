@@ -15,6 +15,7 @@ func GenerateToken(c *gin.Context, key interface{}, user web.CatResp) model.Sess
 	timeT := time.Now().Add(5 * time.Minute)
 
 	claims := &model.Token{
+		Id:       user.Id,
 		Username: user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 
@@ -30,6 +31,7 @@ func GenerateToken(c *gin.Context, key interface{}, user web.CatResp) model.Sess
 		panic(err)
 	}
 	return model.Session{
+		Id:       claims.Id,
 		Username: claims.Username,
 		Expiry:   timeT,
 		Token:    tokenString,
@@ -71,6 +73,7 @@ func ClaimToken(c *gin.Context, key interface{}) *model.Token {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return &model.Token{}
 	} else {
+		c.Set("id", claims.Id)
 		c.Set("username", claims.Username)
 	}
 	// Finally, return the welcome message to the user, along with their

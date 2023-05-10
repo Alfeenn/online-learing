@@ -27,9 +27,9 @@ func (r *RepoImpl) CreateCourse(ctx context.Context, tx *sql.Tx, category model.
 }
 
 func (r *RepoImpl) Update(ctx context.Context, tx *sql.Tx, category model.Course) model.Course {
-	SQL := "UPDATE article SET name=? WHERE id=?"
+	SQL := "UPDATE courses SET name=?,price=?,category=?,thumbnail=? WHERE id=?"
 
-	_, err := tx.ExecContext(ctx, SQL, category.Name, category.Id)
+	_, err := tx.ExecContext(ctx, SQL, category.Name, category.Price, category.Category, category.Thumbnail, category.Id)
 	helper.PanicIfErr(err)
 
 	return category
@@ -42,22 +42,46 @@ func (r *RepoImpl) Delete(ctx context.Context, tx *sql.Tx, id string) {
 	helper.PanicIfErr(err)
 }
 
-func (r *RepoImpl) FindAll(ctx context.Context, tx *sql.Tx) []model.User {
-	sql := "SELECT *FROM user"
+func (r *RepoImpl) DeleteCourse(ctx context.Context, tx *sql.Tx, id string) {
+	SQL := "DELETE FROM course WHERE id=?"
+	_, err := tx.ExecContext(ctx, SQL, id)
+	helper.PanicIfErr(err)
+}
+
+func (r *RepoImpl) FindAll(ctx context.Context, tx *sql.Tx) []model.Course {
+	sql := "SELECT *FROM courses"
 	rows, err := tx.QueryContext(ctx, sql)
 	helper.PanicIfErr(err)
 	defer rows.Close()
 
-	var sliceArticle []model.User
+	var categoryCourse []model.Course
 
 	for rows.Next() {
-		article := model.User{}
-		err := rows.Scan(&article.Id, &article.Username, &article.Password, &article.Name,
-			&article.Age, &article.Phone, &article.Role)
+		course := model.Course{}
+		err := rows.Scan(&course.Id, &course.Name, &course.Price, &course.Category,
+			&course.Thumbnail)
 		helper.PanicIfErr(err)
-		sliceArticle = append(sliceArticle, article)
+		categoryCourse = append(categoryCourse, course)
 	}
-	return sliceArticle
+	return categoryCourse
+}
+
+func (r *RepoImpl) FindCourseById(ctx context.Context, tx *sql.Tx, id string) (model.Course, error) {
+	SQL := "SELECT *FROM courses WHERE id =?"
+
+	rows, err := tx.QueryContext(ctx, SQL, id)
+	helper.PanicIfErr(err)
+	defer rows.Close()
+	model := model.Course{}
+	if rows.Next() {
+		rows.Scan(&model.Id, &model.Name,
+			&model.Category, &model.Thumbnail, &model.Price)
+
+		return model, nil
+	} else {
+		return model, errors.New("no data")
+	}
+
 }
 
 func (r *RepoImpl) FindCourseByCategory(ctx context.Context, tx *sql.Tx, category string) (model.Course, error) {
@@ -69,7 +93,7 @@ func (r *RepoImpl) FindCourseByCategory(ctx context.Context, tx *sql.Tx, categor
 	model := model.Course{}
 	if rows.Next() {
 		rows.Scan(&model.Id, &model.Name,
-			&model.Category, &model.Thumbnail, &model.Price, &model.File)
+			&model.Price, &model.Category, &model.Thumbnail)
 
 		return model, nil
 	} else {
@@ -79,13 +103,13 @@ func (r *RepoImpl) FindCourseByCategory(ctx context.Context, tx *sql.Tx, categor
 }
 
 func (m *RepoImpl) Login(ctx context.Context, tx *sql.Tx, category model.User) (model.User, error) {
-	SQL := `SELECT email,password FROM user WHERE email=?`
+	SQL := `SELECT id,username,password FROM users WHERE username=?`
 	rows, err := tx.QueryContext(ctx, SQL, category.Username)
 	helper.PanicIfErr(err)
 	defer rows.Close()
 	user := model.User{}
 	if rows.Next() {
-		err := rows.Scan(&user.Username, &user.Password)
+		err := rows.Scan(&user.Id, &user.Username, &user.Password)
 		if err != nil {
 			panic(err)
 		}
@@ -102,6 +126,14 @@ func (r *RepoImpl) Register(ctx context.Context, tx *sql.Tx, category model.User
 	_, err := tx.ExecContext(ctx, SQL,
 		category.Id, category.Username, category.Password,
 		category.Name, category.Age, category.Phone, category.Role)
+	helper.PanicIfErr(err)
+	return category
+}
+
+func (r *RepoImpl) GetCourse(ctx context.Context, tx *sql.Tx, category model.Class, id string) model.Class {
+	SQL := "INSERT INTO class (user_id,course_id) VALUES(?,?)"
+	_, err := tx.ExecContext(ctx, SQL,
+		category.UserId, id)
 	helper.PanicIfErr(err)
 	return category
 }

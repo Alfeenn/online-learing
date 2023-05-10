@@ -35,7 +35,6 @@ func (s *ServiceImpl) CreateCourse(ctx context.Context, req model.Course) model.
 		Category:  req.Category,
 		Thumbnail: req.Thumbnail,
 	}
-	log.Printf("model:%v", request)
 	Course := s.Rep.CreateCourse(ctx, tx, request)
 
 	return Course
@@ -47,20 +46,40 @@ func (s *ServiceImpl) Update(ctx context.Context, req model.Course) model.Course
 	helper.PanicIfErr(err)
 	defer helper.CommitorRollback(tx)
 
-	id := req.Category
-	findId, err := s.Rep.FindCourseByCategory(ctx, tx, id)
+	id := req.Id
+	findId, err := s.Rep.FindCourseById(ctx, tx, id)
 	helper.PanicIfErr(err)
 	updateCourse := s.Rep.Update(ctx, tx, findId)
 	return updateCourse
+}
+
+func (s *ServiceImpl) DeleteUser(ctx context.Context, id string) {
+	tx, err := s.DB.Begin()
+	helper.PanicIfErr(err)
+	defer helper.CommitorRollback(tx)
+	s.Rep.Delete(ctx, tx, id)
 }
 
 func (s *ServiceImpl) Delete(ctx context.Context, id string) {
 	tx, err := s.DB.Begin()
 	helper.PanicIfErr(err)
 	defer helper.CommitorRollback(tx)
-	req, err := s.Rep.FindCourseByCategory(ctx, tx, id)
+	req, err := s.Rep.FindCourseById(ctx, tx, id)
+	s.Rep.DeleteCourse(ctx, tx, req.Id)
 	helper.PanicIfErr(err)
 	s.Rep.Delete(ctx, tx, req.Id)
+
+}
+
+func (s *ServiceImpl) FindCourseById(ctx context.Context, id string) model.Course {
+	tx, err := s.DB.Begin()
+	helper.PanicIfErr(err)
+	defer helper.CommitorRollback(tx)
+	model, err := s.Rep.FindCourseById(ctx, tx, id)
+	if err != nil {
+		panic(err)
+	}
+	return model
 
 }
 
@@ -76,22 +95,22 @@ func (s *ServiceImpl) FindCourseByCategory(ctx context.Context, id string) model
 
 }
 
-func (s *ServiceImpl) FindAll(ctx context.Context) []web.CatResp {
+func (s *ServiceImpl) FindAll(ctx context.Context) []model.Course {
 	tx, err := s.DB.Begin()
 	helper.PanicIfErr(err)
 	defer helper.CommitorRollback(tx)
 
 	slicemodel := s.Rep.FindAll(ctx, tx)
 
-	var webResp []web.CatResp
+	var sliceCourse []model.Course
 
 	for _, v := range slicemodel {
-		webResp = append(webResp, helper.ConvertModel(v))
+		sliceCourse = append(sliceCourse, v)
 	}
-	return webResp
+	return sliceCourse
 }
 
-func (s *ServiceImpl) Login(ctx context.Context, request web.CategoryRequest) web.CatResp {
+func (s *ServiceImpl) Login(ctx context.Context, request web.RequestLogin) web.CatResp {
 	tx, err := s.DB.Begin()
 	if err != nil {
 		panic(err)
@@ -131,4 +150,14 @@ func (s *ServiceImpl) Register(ctx context.Context, request web.CategoryRequest)
 	}
 	category = s.Rep.Register(ctx, tx, category)
 	return helper.ConvertModel(category)
+}
+
+func (s *ServiceImpl) GetCourse(ctx context.Context, req model.Class, id string) model.Class {
+	tx, err := s.DB.Begin()
+	helper.PanicIfErr(err)
+	defer helper.CommitorRollback(tx)
+	Class := s.Rep.GetCourse(ctx, tx, req, id)
+	Class.CourseId = id
+	return Class
+
 }

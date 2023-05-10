@@ -26,6 +26,7 @@ func NewController(c service.Service) Controller {
 
 func (c *ControllerImpl) Create(g *gin.Context) {
 	req, err := helper.UploadFile(g)
+
 	if err != nil {
 
 		g.AbortWithStatusJSON(http.StatusBadRequest,
@@ -46,9 +47,7 @@ func (c *ControllerImpl) Create(g *gin.Context) {
 }
 
 func (c *ControllerImpl) Update(g *gin.Context) {
-	req := model.Course{}
-	err := g.ShouldBind(&req)
-	req.Id = g.Param("id")
+	req, err := helper.UploadFile(g)
 	//check if bind json error
 	if err != nil {
 
@@ -70,22 +69,50 @@ func (c *ControllerImpl) Delete(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"code": http.StatusOK, "msg": "Successfully delete data"})
 }
 
-func (c *ControllerImpl) Find(g *gin.Context) {
+func (c *ControllerImpl) DeleteUser(g *gin.Context) {
+	id := g.Param("id")
+	c.ServiceModel.DeleteUser(g.Request.Context(), id)
+	g.JSON(http.StatusOK, gin.H{"code": http.StatusOK, "msg": "Successfully delete data"})
+}
+
+func (c *ControllerImpl) FindCourseById(g *gin.Context) {
 	id := g.Params.ByName("id")
 	if id == "" {
 		g.AbortWithStatusJSON(http.StatusNotFound,
 			gin.H{
 				"code": http.StatusNotFound,
 				"msg":  "Id not found"})
+	} else {
+		result := c.ServiceModel.FindCourseById(g.Request.Context(), id)
+		response := web.WebResponse{
+			Code:   http.StatusOK,
+			Status: "OK",
+			Data:   result,
+		}
+		g.JSON(http.StatusOK, response)
 	}
 
-	result := c.ServiceModel.FindCourseByCategory(g.Request.Context(), id)
-	response := web.WebResponse{
-		Code:   http.StatusOK,
-		Status: "OK",
-		Data:   result,
+}
+
+func (c *ControllerImpl) FindCourseByCategory(g *gin.Context) {
+	id := g.Params.ByName("category")
+	log.Print(id)
+	if id == "" {
+		g.AbortWithStatusJSON(http.StatusNotFound,
+			gin.H{
+				"code": http.StatusNotFound,
+				"msg":  "category not found"})
+	} else {
+
+		result := c.ServiceModel.FindCourseByCategory(g.Request.Context(), id)
+		response := web.WebResponse{
+			Code:   http.StatusOK,
+			Status: "OK",
+			Data:   result,
+		}
+		g.JSON(http.StatusOK, response)
+
 	}
-	g.JSON(http.StatusOK, response)
 
 }
 
@@ -103,13 +130,16 @@ func (c *ControllerImpl) FindAll(g *gin.Context) {
 
 func (c *ControllerImpl) UserSignIn(g *gin.Context) {
 	key := strconv.AppendBool([]byte(model.Key), true)
-	requestservice := web.CategoryRequest{}
+	requestservice := web.RequestLogin{
+		Username: g.Request.FormValue("username"),
+		Password: g.Request.FormValue("password"),
+	}
 	//check form input
 	err := g.ShouldBind(&requestservice)
 	if err != nil {
-		g.AbortWithStatusJSON(http.StatusInternalServerError,
+		g.AbortWithStatusJSON(http.StatusBadRequest,
 			gin.H{
-				"code": http.StatusInternalServerError,
+				"code": http.StatusBadRequest,
 				"msg":  err.Error(),
 			})
 	} else {
@@ -177,6 +207,33 @@ func (c *ControllerImpl) Register(g *gin.Context) {
 			Code:   http.StatusCreated,
 			Status: "CREATED",
 			Data:   resp,
+		}
+		g.JSON(http.StatusOK, response)
+	}
+
+}
+
+func (c *ControllerImpl) GetCourse(g *gin.Context) {
+	id := g.Params.ByName("idcourse")
+	req := model.Class{}
+	sub, existed := g.Get("id")
+	if !existed {
+		g.AbortWithStatusJSON(401, gin.H{"code": 401, "msg": "User hasn't logged in yet"})
+		return
+	}
+	req.UserId = fmt.Sprint(sub)
+	log.Print(req.UserId)
+	if id == "" {
+		g.AbortWithStatusJSON(http.StatusNotFound,
+			gin.H{
+				"code": http.StatusNotFound,
+				"msg":  "Id not found"})
+	} else {
+		result := c.ServiceModel.GetCourse(g.Request.Context(), req, id)
+		response := web.WebResponse{
+			Code:   http.StatusOK,
+			Status: "OK",
+			Data:   result,
 		}
 		g.JSON(http.StatusOK, response)
 	}

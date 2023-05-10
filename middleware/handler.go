@@ -7,6 +7,7 @@ import (
 
 	"github.com/Alfeenn/online-learning/helper"
 	"github.com/Alfeenn/online-learning/model"
+	"github.com/Alfeenn/online-learning/model/web"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,8 +26,9 @@ func AuthJWT() gin.HandlerFunc {
 		key := strconv.AppendBool([]byte(model.Key), true)
 		claim := helper.ClaimToken(ctx, key)
 		if claim.Username == "" {
+			response := web.WebResponse{Code: http.StatusUnauthorized, Status: "UNAUTHORIZED"}
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized,
-				gin.H{"msg": "UNAUTHORIZED", "code": http.StatusUnauthorized})
+				response)
 		}
 		log.Print(gin.H{"data": claim.Username})
 	}
