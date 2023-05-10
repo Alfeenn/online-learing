@@ -7,5 +7,5 @@ type User struct {
 	Name     string `gorm:"not null; size:20"`
 	Age      int64  `gorm:"not null; size:20"`
 	Phone    int64  `gorm:"not null; size:20"`
-	Role     string `gorm:"not null; size:10"`
+	Role     string `gorm:"not null; default:user size:10"`
 }
