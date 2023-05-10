@@ -1,11 +1,14 @@
 package model
 
+import "mime/multipart"
+
 type Course struct {
-	Id        string `gorm:"" json:"id"`
-	Name      string `gorm:"not null; size:20" json:"name"`
-	Price     int    `gorm:"not null; size:50" json:"price"`
-	Category  string `gorm:"not null; size:20" json:"category"`
-	Thumbnail string `gorm:"not null; size:50" json:"thumbnail"`
+	Id        string                `form:"id" gorm:"" json:"id"`
+	Name      string                `form:"name" gorm:"not null; size:20" json:"name" binding:"required"`
+	Price     int                   `form:"price" gorm:"not null; size:50" json:"price"`
+	Category  string                `form:"category" gorm:"not null; size:20" json:"category"`
+	File      *multipart.FileHeader `form:"file"  json:"file" binding:"required"`
+	Thumbnail string                `form:"thumbnail" gorm:"not null; size:50" json:"thumbnail"`
 }
 
 type Class struct {

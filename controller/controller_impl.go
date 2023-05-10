@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -24,47 +25,42 @@ func NewController(c service.Service) Controller {
 }
 
 func (c *ControllerImpl) Create(g *gin.Context) {
-	enforcer := middleware.UserPolicy()
-	req := web.CategoryRequest{
-		Username: g.Request.FormValue("username"),
-		Password: g.Request.FormValue("password"),
-		Role:     g.Request.FormValue("role"),
-	}
-
-	err := g.BindJSON(&req)
+	req, err := helper.UploadFile(g)
 	if err != nil {
-		g.AbortWithStatusJSON(http.StatusInternalServerError,
+
+		g.AbortWithStatusJSON(http.StatusBadRequest,
 			gin.H{
-				"code": http.StatusInternalServerError,
+				"code": http.StatusBadRequest,
 				"msg":  err.Error(),
 			})
-	}
+	} else {
 
-	req.Password, _ = helper.HashPassword(req.Password)
-	resp := c.ServiceModel.Create(g.Request.Context(), req)
-	enforcer.AddGroupingPolicy(fmt.Sprint(resp.Username), resp.Role)
-	response := web.WebResponse{
-		Code:   http.StatusCreated,
-		Status: "CREATED",
-		Data:   resp,
+		resp := c.ServiceModel.CreateCourse(g.Request.Context(), req)
+		response := web.WebResponse{
+			Code:   http.StatusCreated,
+			Status: "CREATED",
+			Data:   resp,
+		}
+		g.JSON(http.StatusOK, response)
 	}
-	g.JSON(http.StatusOK, response)
 }
 
 func (c *ControllerImpl) Update(g *gin.Context) {
-	req := web.UpdateRequest{}
-	err := g.BindJSON(&req)
+	req := model.Course{}
+	err := g.ShouldBind(&req)
 	req.Id = g.Param("id")
 	//check if bind json error
 	if err != nil {
+
 		g.AbortWithStatusJSON(http.StatusInternalServerError,
 			gin.H{
 				"code": http.StatusInternalServerError,
 				"msg":  err.Error(),
 			})
+	} else {
+		result := c.ServiceModel.Update(g.Request.Context(), req)
+		g.JSON(http.StatusOK, result)
 	}
-	result := c.ServiceModel.Update(g.Request.Context(), req)
-	g.JSON(http.StatusOK, result)
 
 }
 
@@ -83,7 +79,7 @@ func (c *ControllerImpl) Find(g *gin.Context) {
 				"msg":  "Id not found"})
 	}
 
-	result := c.ServiceModel.Find(g.Request.Context(), id)
+	result := c.ServiceModel.FindCourseByCategory(g.Request.Context(), id)
 	response := web.WebResponse{
 		Code:   http.StatusOK,
 		Status: "OK",
@@ -153,5 +149,36 @@ func (c *ControllerImpl) GetAccessList(g *gin.Context) {
 		Data:   adapter,
 	}
 	g.JSON(http.StatusOK, response)
+
+}
+
+func (c *ControllerImpl) Register(g *gin.Context) {
+	enforcer := middleware.UserPolicy()
+	req := web.CategoryRequest{}
+	age, _ := strconv.Atoi(g.Request.FormValue("age"))
+	req.Age = int64(age)
+	phone, _ := strconv.Atoi(g.Request.FormValue("phone"))
+	req.Phone = int64(phone)
+
+	err := g.ShouldBind(&req)
+	log.Print(req)
+	if err != nil {
+		g.AbortWithStatusJSON(http.StatusBadRequest,
+			gin.H{
+				"code": http.StatusBadRequest,
+				"msg":  err.Error(),
+			})
+	} else {
+
+		req.Password, _ = helper.HashPassword(req.Password)
+		resp := c.ServiceModel.Register(g.Request.Context(), req)
+		enforcer.AddGroupingPolicy(fmt.Sprint(resp.Username), resp.Role)
+		response := web.WebResponse{
+			Code:   http.StatusCreated,
+			Status: "CREATED",
+			Data:   resp,
+		}
+		g.JSON(http.StatusOK, response)
+	}
 
 }

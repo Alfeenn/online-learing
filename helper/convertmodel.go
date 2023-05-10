@@ -6,6 +6,9 @@ import (
 )
 
 func ConvertModel(req model.User) web.CatResp {
+	if req.Role == "" {
+		req.Role = "user"
+	}
 	return web.CatResp{
 		Id:       req.Id,
 		Username: req.Username,

@@ -12,4 +12,5 @@ type Controller interface {
 	FindAll(g *gin.Context)
 	UserSignIn(g *gin.Context)
 	GetAccessList(g *gin.Context)
+	Register(g *gin.Context)
 }

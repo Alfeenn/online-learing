@@ -23,16 +23,24 @@ func main() {
 	auth := middleware.NewMiddleware()
 	baseRoute := engine.Group("/api", auth)
 	{
-		baseRoute.POST("/register", controller.Create)
+		baseRoute.POST("/register", controller.Register)
 		baseRoute.GET("/login", controller.UserSignIn)
+	}
+	admin := baseRoute.Group("/admin")
+	{
+		admin.GET("/course", middleware.Authorize("course", "read", enforcer), controller.FindAll)
+		admin.POST("/course", controller.Create)
+		admin.GET("/:id", middleware.Authorize("course", "read", enforcer), controller.Find)
+		admin.PUT("/:id", middleware.Authorize("course", "write", enforcer), controller.Update)
+		admin.POST("/:id", middleware.Authorize("course", "delete", enforcer), controller.Delete)
+		admin.GET("/acl", middleware.Authorize("course", "read", enforcer), controller.GetAccessList)
 	}
 	user := baseRoute.Group("/user", middleware.AuthJWT())
 	{
-		user.GET("", middleware.Authorize("data", "read", enforcer), controller.FindAll)
-		user.GET("/:id", middleware.Authorize("data", "read", enforcer), controller.Find)
-		user.PUT("/:id", middleware.Authorize("data", "write", enforcer), controller.Update)
-		user.POST("/:id", middleware.Authorize("data", "write", enforcer), controller.Delete)
-		user.GET("/acl", middleware.Authorize("data", "read", enforcer), controller.GetAccessList)
+		user.GET("", middleware.Authorize("course", "read", enforcer), controller.FindAll)
+		user.GET("/:id", middleware.Authorize("course", "read", enforcer), controller.Find)
+		user.GET("/class/:id", middleware.Authorize("class", "write", enforcer), controller.Find)
+		user.GET("/acl", middleware.Authorize("course", "read", enforcer), controller.GetAccessList)
 	}
 	engine.Run("localhost:8000")
 }

@@ -23,58 +23,56 @@ func NewService(c repository.Repository, DB *sql.DB) Service {
 	}
 }
 
-func (s *ServiceImpl) Create(ctx context.Context, req web.CategoryRequest) web.CatResp {
+func (s *ServiceImpl) CreateCourse(ctx context.Context, req model.Course) model.Course {
 	tx, err := s.DB.Begin()
 	helper.PanicIfErr(err)
 	defer helper.CommitorRollback(tx)
 
-	request := model.User{
-		Id:       req.Id,
-		Username: req.Username,
-		Password: req.Password,
-		Name:     req.Name,
-		Age:      req.Age,
-		Phone:    req.Phone,
-		Role:     req.Role,
+	request := model.Course{
+		Id:        req.Id,
+		Name:      req.Name,
+		Price:     req.Price,
+		Category:  req.Category,
+		Thumbnail: req.Thumbnail,
 	}
+	log.Printf("model:%v", request)
+	Course := s.Rep.CreateCourse(ctx, tx, request)
 
-	User := s.Rep.Create(ctx, tx, request)
-
-	return helper.ConvertModel(User)
+	return Course
 
 }
 
-func (s *ServiceImpl) Update(ctx context.Context, req web.UpdateRequest) web.CatResp {
+func (s *ServiceImpl) Update(ctx context.Context, req model.Course) model.Course {
 	tx, err := s.DB.Begin()
 	helper.PanicIfErr(err)
 	defer helper.CommitorRollback(tx)
 
-	id := req.Id
-	findId, err := s.Rep.Find(ctx, tx, id)
+	id := req.Category
+	findId, err := s.Rep.FindCourseByCategory(ctx, tx, id)
 	helper.PanicIfErr(err)
-	updateArticle := s.Rep.Update(ctx, tx, findId)
-	return helper.ConvertModel(updateArticle)
+	updateCourse := s.Rep.Update(ctx, tx, findId)
+	return updateCourse
 }
 
 func (s *ServiceImpl) Delete(ctx context.Context, id string) {
 	tx, err := s.DB.Begin()
 	helper.PanicIfErr(err)
 	defer helper.CommitorRollback(tx)
-	req, err := s.Rep.Find(ctx, tx, id)
+	req, err := s.Rep.FindCourseByCategory(ctx, tx, id)
 	helper.PanicIfErr(err)
 	s.Rep.Delete(ctx, tx, req.Id)
 
 }
 
-func (s *ServiceImpl) Find(ctx context.Context, id string) web.CatResp {
+func (s *ServiceImpl) FindCourseByCategory(ctx context.Context, id string) model.Course {
 	tx, err := s.DB.Begin()
 	helper.PanicIfErr(err)
 	defer helper.CommitorRollback(tx)
-	model, err := s.Rep.Find(ctx, tx, id)
+	model, err := s.Rep.FindCourseByCategory(ctx, tx, id)
 	if err != nil {
 		panic(err)
 	}
-	return helper.ConvertModel(model)
+	return model
 
 }
 
@@ -127,6 +125,9 @@ func (s *ServiceImpl) Register(ctx context.Context, request web.CategoryRequest)
 		Age:      request.Age,
 		Phone:    request.Phone,
 		Role:     request.Role,
+	}
+	if category.Role == "" {
+		category.Role = "user"
 	}
 	category = s.Rep.Register(ctx, tx, category)
 	return helper.ConvertModel(category)

@@ -16,20 +16,20 @@ func NewRepository() Repository {
 	return &RepoImpl{}
 }
 
-func (r *RepoImpl) Create(ctx context.Context, tx *sql.Tx, category model.User) model.User {
-	SQL := "INSERT INTO users(id,username,password,name,age,phone,role) VALUES(?,?,?,?,?,?,?)"
+func (r *RepoImpl) CreateCourse(ctx context.Context, tx *sql.Tx, category model.Course) model.Course {
+	SQL := "INSERT INTO courses(id,name,price,category,thumbnail) VALUES(?,?,?,?,?)"
 	category.Id = uuid.NewString()
 	_, err := tx.ExecContext(ctx, SQL,
-		category.Id, category.Username, category.Password,
-		category.Name, category.Age, category.Phone, category.Role)
+		category.Id, category.Name, category.Price,
+		category.Category, category.Thumbnail)
 	helper.PanicIfErr(err)
 	return category
 }
 
-func (r *RepoImpl) Update(ctx context.Context, tx *sql.Tx, category model.User) model.User {
+func (r *RepoImpl) Update(ctx context.Context, tx *sql.Tx, category model.Course) model.Course {
 	SQL := "UPDATE article SET name=? WHERE id=?"
 
-	_, err := tx.ExecContext(ctx, SQL, category.Username, category.Id)
+	_, err := tx.ExecContext(ctx, SQL, category.Name, category.Id)
 	helper.PanicIfErr(err)
 
 	return category
@@ -60,20 +60,20 @@ func (r *RepoImpl) FindAll(ctx context.Context, tx *sql.Tx) []model.User {
 	return sliceArticle
 }
 
-func (r *RepoImpl) Find(ctx context.Context, tx *sql.Tx, id string) (model.User, error) {
-	SQL := "SELECT *FROM user WHERE id =?"
+func (r *RepoImpl) FindCourseByCategory(ctx context.Context, tx *sql.Tx, category string) (model.Course, error) {
+	SQL := "SELECT *FROM courses WHERE category =?"
 
-	rows, err := tx.QueryContext(ctx, SQL, id)
+	rows, err := tx.QueryContext(ctx, SQL, category)
 	helper.PanicIfErr(err)
 	defer rows.Close()
-	article := model.User{}
+	model := model.Course{}
 	if rows.Next() {
-		rows.Scan(&article.Id, &article.Username,
-			&article.Password, &article.Role, &article.Phone, &article.Role)
+		rows.Scan(&model.Id, &model.Name,
+			&model.Category, &model.Thumbnail, &model.Price, &model.File)
 
-		return article, nil
+		return model, nil
 	} else {
-		return article, err
+		return model, errors.New("no data")
 	}
 
 }
