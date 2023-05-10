@@ -82,6 +82,7 @@ func (c *ControllerImpl) Find(g *gin.Context) {
 				"code": http.StatusNotFound,
 				"msg":  "Id not found"})
 	}
+
 	result := c.ServiceModel.Find(g.Request.Context(), id)
 	response := web.WebResponse{
 		Code:   http.StatusOK,

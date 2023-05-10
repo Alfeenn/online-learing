@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	migrate := cmd.MigrateCmd()
+	migrate, enforcer := cmd.MigrateCmd()
 	if migrate {
 		return
 	}
@@ -21,7 +21,6 @@ func main() {
 	service := service.NewService(repo, db)
 	controller := controller.NewController(service)
 	auth := middleware.NewMiddleware()
-	enforcer := middleware.UserPolicy()
 	baseRoute := engine.Group("/api", auth)
 	{
 		baseRoute.POST("/register", controller.Create)

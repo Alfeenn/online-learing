@@ -17,11 +17,11 @@ func NewRepository() Repository {
 }
 
 func (r *RepoImpl) Create(ctx context.Context, tx *sql.Tx, category model.User) model.User {
-	SQL := "INSERT INTO user(id,email,password,role,created_at,updated_at) VALUES(?,?,?,?,?,?)"
+	SQL := "INSERT INTO users(id,username,password,name,age,phone,role) VALUES(?,?,?,?,?,?,?)"
 	category.Id = uuid.NewString()
 	_, err := tx.ExecContext(ctx, SQL,
 		category.Id, category.Username, category.Password,
-		category.Role, category.Phone, category.Password)
+		category.Name, category.Age, category.Phone, category.Role)
 	helper.PanicIfErr(err)
 	return category
 }
@@ -52,8 +52,8 @@ func (r *RepoImpl) FindAll(ctx context.Context, tx *sql.Tx) []model.User {
 
 	for rows.Next() {
 		article := model.User{}
-		err := rows.Scan(&article.Id, &article.Username, &article.Name, &article.Age,
-			&article.Password, &article.Role, &article.Phone, &article.Role)
+		err := rows.Scan(&article.Id, &article.Username, &article.Password, &article.Name,
+			&article.Age, &article.Phone, &article.Role)
 		helper.PanicIfErr(err)
 		sliceArticle = append(sliceArticle, article)
 	}
@@ -97,11 +97,11 @@ func (m *RepoImpl) Login(ctx context.Context, tx *sql.Tx, category model.User) (
 }
 
 func (r *RepoImpl) Register(ctx context.Context, tx *sql.Tx, category model.User) model.User {
-	SQL := "INSERT INTO user(id,email,password,role,created_at,updated_at) VALUES(?,?,?,?,?,?)"
+	SQL := "INSERT INTO users(id,username,password,name,age,phone,role) VALUES(?,?,?,?,?,?,?)"
 	category.Id = uuid.NewString()
 	_, err := tx.ExecContext(ctx, SQL,
 		category.Id, category.Username, category.Password,
-		category.Role, category.Age, category.Phone)
+		category.Name, category.Age, category.Phone, category.Role)
 	helper.PanicIfErr(err)
 	return category
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/Alfeenn/online-learning/helper"
 	"github.com/Alfeenn/online-learning/model"
@@ -110,4 +111,23 @@ func (s *ServiceImpl) Login(ctx context.Context, request web.CategoryRequest) we
 
 	return helper.ConvertModel(category)
 
+}
+
+func (s *ServiceImpl) Register(ctx context.Context, request web.CategoryRequest) web.CatResp {
+	tx, err := s.DB.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer helper.CommitorRollback(tx)
+	category := model.User{
+		Id:       request.Id,
+		Username: request.Username,
+		Password: request.Password,
+		Name:     request.Name,
+		Age:      request.Age,
+		Phone:    request.Phone,
+		Role:     request.Role,
+	}
+	category = s.Rep.Register(ctx, tx, category)
+	return helper.ConvertModel(category)
 }
