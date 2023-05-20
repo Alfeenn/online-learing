@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=course
+      - MYSQL_ROOT_PASSWORD=abcd
+    ports:
+      - '3306:3306'
+    volumes:
+      - db:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  api:
+    container_name: test
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: test
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    environment:
+      DB_HOST: host.docker.internal
+      DB_PORT: 3306
+      DB_PASSWORD: abcd
+      DB_NAME: course
+    links:
+      - db
+    volumes:
+      - ./:/src
+volumes:
+  db:
+    driver: local
