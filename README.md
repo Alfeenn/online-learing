@@ -42,7 +42,7 @@ cmd : online-learning.exe -migrate up
 Use Postman API Documentation :
 
 ```http
-  https://www.postman.com/solar-water-440274/workspace/test/collection/20757492-1e249602-d084-42f5-91b0-a02e727510a9?action=share&creator=20757492
+  [https://www.postman.com/solar-water-440274/workspace/test/collection/20757492-1e249602-d084-42f5-91b0-a02e727510a9?action=share&creator=20757492](https://solar-water-440274.postman.co/workspace/test~c3c82bac-eb61-4aee-a426-26f550d08a36/overview)
 ```
 
 
@@ -97,6 +97,6 @@ Use Token to protected api
 see full documentation :
 
 ```http
-  https://www.postman.com/solar-water-440274/workspace/test/collection/20757492-1e249602-d084-42f5-91b0-a02e727510a9?action=share&creator=20757492
+  [https://www.postman.com/solar-water-440274/workspace/test/collection/20757492-1e249602-d084-42f5-91b0-a02e727510a9?action=share&creator=20757492](https://solar-water-440274.postman.co/workspace/test~c3c82bac-eb61-4aee-a426-26f550d08a36/overview)
 ```
 
